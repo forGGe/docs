@@ -67,13 +67,14 @@ Additionally, TTN client must supply following parameters with MQTT CONNECT:
 
 An MQTT password can be ignored. The gateway is authenticated by matching the gateway ID and the gateway key.
 
-Optionally, TTN client can use the MQTT Will Message option when sending MQTT CONNECT. In such case, the will message must be serialized using `DisconnectMessage` protobuf, that can be found in `github.com/TheThingsNetwork/gateway-connector-bridge/types/types.proto`. 
+Optionally, TTN client can use the MQTT Will Message option when sending MQTT CONNECT. In such case, the will message must be serialized using [the `DisconnectMessage` protomessage](https://github.com/TheThingsNetwork/gateway-connector-bridge/blob/8a00f170d96aa0867ac43faa6d1c0ad705204a81/types/types.proto#L17-L20), detailed description of which can be found below:
 
-* [`DisconnectMessage` - top-level container for the disconnect message](https://github.com/TheThingsNetwork/gateway-connector-bridge/blob/8a00f170d96aa0867ac43faa6d1c0ad705204a81/types/types.proto#L17-L20):
-  * `id` - string - gateway ID.
-  * `key` - string - gateway key.
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| id | string | gateway ID |
+| key | string | gateway key |
 
-The Will Message must, if being used, must have following parameters:
+The Will Message must have (if being used) following parameters:
 
 * QoS level: 1
 * RETAIN flag: false
@@ -82,11 +83,16 @@ The Will Message must, if being used, must have following parameters:
 
 The PUBLISH MQTT message in question conforms to the MQTT v3.1 specification.
 
-Additionally, TTN client must supply a protobuf payload, described by the `ConnectMessage` protobuf, that can be found in `github.com/TheThingsNetwork/gateway-connector-bridge/types/types.proto`.
+Additionally, TTN client must supply a protobuf payload as described in the next section.
 
-* [`ConnectMessage` - top-level container for the connect message](https://github.com/TheThingsNetwork/gateway-connector-bridge/blob/8a00f170d96aa0867ac43faa6d1c0ad705204a81/types/types.proto#L12-L15):
-  * `id` - string - gateway ID.
-  * `key` - string - gateway key.
+#### Connection message payload (protobuf) format
+
+The connect message format is defined by [the `ConnectMessage` protomessage](https://github.com/TheThingsNetwork/gateway-connector-bridge/blob/8a00f170d96aa0867ac43faa6d1c0ad705204a81/types/types.proto#L12-L15), detailed description of which can be found below:
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| id | string | gateway ID |
+| key | string | gateway key |
 
 #### MQTT SUBSCRIBE message format
 
@@ -115,11 +121,19 @@ Following MQTT parameters are required by TTN for disconnect MQTT message:
 * QoS level: 1
 * RETAIN flag: false
 
-Additionally, TTN client must supply a protobuf payload, described by the `DisconnectMessage` protobuf, that can be found in `github.com/TheThingsNetwork/gateway-connector-bridge/types/types.proto`. 
+Additionally, TTN client must supply a protobuf payload, as described in the next section.
 
-* [`DisconnectMessage` - top-level container for the disconnect message](https://github.com/TheThingsNetwork/gateway-connector-bridge/blob/8a00f170d96aa0867ac43faa6d1c0ad705204a81/types/types.proto#L17-L20):
+#### Disconnection message payload (protobuf) format
+
+The disconnect message format is defined by [the `DisconnectMessage` protomessage](https://github.com/TheThingsNetwork/gateway-connector-bridge/blob/8a00f170d96aa0867ac43faa6d1c0ad705204a81/types/types.proto#L17-L20), detailed description of which can be found below:
+
   * `id` - string - gateway ID.
   * `key` - string - gateway key.
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| id | string |  | gateway ID |
+| key | string |  | gateway key |
 
 #### MQTT DISCONNECT message format
 
@@ -138,21 +152,16 @@ A client must set following fields in PUBLISH message in order to send data to T
 * QoS level: 1
 * RETAIN flag: false
 
-Additionally, TTN client must supply a protobuf payload, described by the `UplinkMessage` protobuf, that can be found in `github.com/TheThingsNetwork/api/router/router.proto` and in nested protobuffers. Only relevant messages and their fields are described below.
+Additionally, TTN client must supply a protobuf payload, as described in the next section.
 
-`github.com/TheThingsNetwork/api/router/router.proto`. 
+#### Uplink message protobuf format
 
-* [`UplinkMessage` - the top-level container for the uplink data](https://github.com/TheThingsNetwork/api/blob/22ad17f21fd52dca346a3bb4d4c9889dd9636f7d/router/router.proto#L25-L31)
-  * `payload` - `bytes` - uplink LoRa payload.
-  * [`protocol_metadata` - `lorawan.Metadata` - container for uplink metadata](https://github.com/TheThingsNetwork/api/blob/22ad17f21fd52dca346a3bb4d4c9889dd9636f7d/protocol/lorawan/lorawan.proto#L21-L34).
-    * [`modulation` - `Modulation` - LoRa of FSK modulation flag](https://github.com/TheThingsNetwork/api/blob/22ad17f21fd52dca346a3bb4d4c9889dd9636f7d/protocol/lorawan/lorawan.proto#L16-L19)
-    * `data_rate` - `string` - LoRa data rate in form SF{spreadingfactor}BW{bandwidth}.
-    * `bit_rate` - `uint32` - FSK bit rate in bit/s.
-    * `coding_rate` - `string` - LoRa coding rate
-    * `f_cnt` - `uint32` - the full 32 bit FCnt (deprecated, do not use).
-    * [`frequency_plan` - `FrequencyPlan` - frequency plan enumeration.](https://github.com/TheThingsNetwork/api/blob/master/protocol/lorawan/lorawan.proto#L62-L82)
-  * `message` - `lorawan.Message` - not used when sending uplink from the gateway to TTN bridge.
-  * `trace` - `trace.Trace` - not used.
+The uplink message format is defined by [the `UplinkMessage` protomessage](https://github.com/TheThingsNetwork/api/blob/22ad17f21fd52dca346a3bb4d4c9889dd9636f7d/router/router.proto#L25-L31), detailed description of which is [located under separate section in API repository](https://github.com/TheThingsNetwork/api/blob/master/router/Router.md#routeruplinkmessage).
+
+**Important notes:** 
+
+* [`.trace.Trace`](https://github.com/TheThingsNetwork/api/blob/master/router/Router.md#tracetrace) under `trace` field can be omitted when serializing the uplink. 
+* [`.lorawan.Message`](https://github.com/TheThingsNetwork/api/blob/master/router/Router.md#routeruplinkmessage) under `message` field must not be used, when serializing the uplink.**
 
 ### Receiving data
 
@@ -162,30 +171,17 @@ The downlink data is published by TTN on `[id]/down` topic, where `[id]` is a ga
 
 The PUBLISH MQTT message in question conforms to the MQTT v3.1 specification.
 
-A protobuf payload is described by the `DownlinkMessage` protobuf, that can be found in `github.com/TheThingsNetwork/api/router/router.proto` and in nested protobuffers. Only relevant messages and their fields are shown below.
+Additionally, TTN client will receive a downlink packet encoded in protobuf format, as described in the next section.
 
-* [`DownlinkMessage` - the top-level container for the downlink data](https://github.com/TheThingsNetwork/api/blob/22ad17f21fd52dca346a3bb4d4c9889dd9636f7d/router/router.proto#L33-L39)
-  * `payload` - `bytes` - downlink LoRa payload.
-  * [`protocol_configuration` - `lorawan.TxConfiguration` - LoRa configuration](https://github.com/TheThingsNetwork/api/blob/22ad17f21fd52dca346a3bb4d4c9889dd9636f7d/protocol/lorawan/lorawan.proto#L36-L47).
-    * [`modulation` - `Modulation` - LoRa of FSK modulation flag]()
-    * `data_rate` - `string` - LoRa data rate in form SF{spreadingfactor}BW{bandwidth}.
-    * `bit_rate` - `uint32` - FSK bit rate in bit/s.
-    * `coding_rate` - `string` - LoRa coding rate
-  * [`gateway_configuration` - `gateway.TxConfiguration` - gateway configuration](https://github.com/TheThingsNetwork/api/blob/22ad17f21fd52dca346a3bb4d4c9889dd9636f7d/gateway/gateway.proto#L104-L119).
-    * `timestamp` - `uint32` - Timestamp (uptime of LoRa module) in microseconds with rollover.
-    * `rf_chain` - `uint32` - RF chain.
-    * `frequency` - `uint64` - Frequency in Hz.
-    * `power` - `int32` - Transmit power in dBm.
-    * `polarization_inversion` - `bool` - LoRa polarization inversion (basically always true for messages from gateway to node).
-    * `frequency_deviation` - `uint32` - FSK frequency deviation in Hz
-  * `message` - `lorawan.Message` - not used when receiving downlink from TTN bridge.
-  * `trace` - `trace.Trace` - not used.
+#### Downlink message payload (protobuf) format
+
+The downlink message format is defined by [the `DownlinkMessage` protomessage](https://github.com/TheThingsNetwork/api/blob/22ad17f21fd52dca346a3bb4d4c9889dd9636f7d/router/router.proto#L33-L39), detailed description of which is [located under separate section in API repository](https://github.com/TheThingsNetwork/api/blob/master/router/Router.md#routerdownlinkmessage).
 
 ### Sending the gateway status message
 
 A sending status procedure consist of sending the PUBLISH MQTT message to `[id]/status` topic, where `[id]` is a gateway ID with a protobuf payload, as described below.
 
-#### Status message (MQTT PUBLISH) format
+### Status message (MQTT PUBLISH) format
 
 The PUBLISH MQTT message in question conforms to the MQTT v3.1 specification.
 
@@ -194,31 +190,8 @@ A client must set following fields in PUBLISH message in order to send data to T
 * QoS level: 1
 * RETAIN flag: false
 
-A protobuf payload is described by the `Status` protobuf, that can be found in `github.com/TheThingsNetwork/api/gateway/gateway.proto` and in nested protobuffers. Only relevant messages and their fields are shown below.
+Additionally, TTN client must supply a protobuf payload, as described in the next section.
 
-* [`Status` - the top-level container for the status data](https://github.com/TheThingsNetwork/api/blob/22ad17f21fd52dca346a3bb4d4c9889dd9636f7d/router/router.proto#L33-L39)
-  * `message` - `lorawan.Message` - not used when receiving downlink from TTN bridge.
-  * `trace` - `trace.Trace` - not used.
+### Status message payload (protobuf) format.
 
-
-## Protocol overview
-
-The Gateway Connector Protocol payload is serialized using Google Protocol Buffers (Protobufs for short). 
-Protobufs specification
-Official documentation of the Protobufs are available through following link: https://developers.google.com/protocol-buffers/
-
-Source proto-files, that describes the payload structure of the Gateway Connector Protocol are gateway.proto and router.proto . 
-MQTT specification
-The Gateway Connector Protocol works on top of regular MQTT, the specification of which can be found at http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html
-
-The protocol does not specify exact The Things Network LoRa Router to connect. Address is depends on a region. Full list of Router addresses are available in the official documentation 
-
-The protocol expects that the Gateway ID and the Gateway Key, obtained when the gateway is registered in The Things Network, are passed with MQTT connect message as username and password, respectively.
-
-The protocol specifies two topics:
-[id]/down - topic for downlink protobuf messages, gateway should subscribe to it. [id]is the Gateway ID.
-[id]/up - topic for publishing uplink messages from the gateway. [id]is the Gateway ID.
-The Things Network connector library
-TODO
-
-## Existing implementation
+The status message format is defined by [the `Status` protomessage](https://github.com/TheThingsNetwork/api/blob/22ad17f21fd52dca346a3bb4d4c9889dd9636f7d/gateway/gateway.proto#L122-L199), detailed description of which is [located under separate section in API repository](https://github.com/TheThingsNetwork/api/blob/fb52190ace68dfb15b2b13ee07a36e9e195cfcf2/router/Router.md#gatewaystatus-1).
