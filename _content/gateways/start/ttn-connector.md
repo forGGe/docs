@@ -53,7 +53,7 @@ Briefly, a connection procedure can be performed by following steps:
 
 Refer to sections below for more detailed description of each step.
 
-#### MQTT CONNECT
+#### MQTT CONNECT message format
 
 The CONNECT MQTT message in question conforms to the MQTT v3.1 specification.
 
@@ -67,57 +67,28 @@ Additionally, TTN client must supply following parameters with MQTT CONNECT:
 
 An MQTT password can be ignored. The gateway is authenticated by matching the gateway ID and the gateway key.
 
-Optionally, TTN client can use the MQTT Will Message option when sending MQTT CONNECT. In such case, the will message must be serialized using `DisconnectMessage` protobuf, that can be found in `github.com/TheThingsNetwork/gateway-connector-bridge/types/types.proto`. Relevant message is described below.
+Optionally, TTN client can use the MQTT Will Message option when sending MQTT CONNECT. In such case, the will message must be serialized using `DisconnectMessage` protobuf, that can be found in `github.com/TheThingsNetwork/gateway-connector-bridge/types/types.proto`. 
 
-```protobuf
-syntax = "proto3";
-
-import "github.com/gogo/protobuf/gogoproto/gogo.proto";
-
-package types;
-
-option go_package = "github.com/TheThingsNetwork/gateway-connector-bridge/types";
-
-// ... 
-
-message DisconnectMessage {
-  string id = 1 [(gogoproto.customname) = "GatewayID"];
-  string key   = 3;
-}
-
-```
+* [`DisconnectMessage` - top-level container for the disconnect message](https://github.com/TheThingsNetwork/gateway-connector-bridge/blob/8a00f170d96aa0867ac43faa6d1c0ad705204a81/types/types.proto#L17-L20):
+  * `id` - string - gateway ID.
+  * `key` - string - gateway key.
 
 The Will Message must, if being used, must have following parameters:
 
 * QoS level: 1
 * RETAIN flag: false
 
-
-#### MQTT PUBLISH
+#### Connection message (MQTT PUBLISH) format
 
 The PUBLISH MQTT message in question conforms to the MQTT v3.1 specification.
 
-Additionally, TTN client must supply a protobuf payload, described by the `ConnectMessage` protobuf, that can be found in `github.com/TheThingsNetwork/gateway-connector-bridge/types/types.proto`. Relevant message is described below.
+Additionally, TTN client must supply a protobuf payload, described by the `ConnectMessage` protobuf, that can be found in `github.com/TheThingsNetwork/gateway-connector-bridge/types/types.proto`.
 
-```protobuf
-syntax = "proto3";
+* [`ConnectMessage` - top-level container for the connect message](https://github.com/TheThingsNetwork/gateway-connector-bridge/blob/8a00f170d96aa0867ac43faa6d1c0ad705204a81/types/types.proto#L12-L15):
+  * `id` - string - gateway ID.
+  * `key` - string - gateway key.
 
-import "github.com/gogo/protobuf/gogoproto/gogo.proto";
-
-package types;
-
-option go_package = "github.com/TheThingsNetwork/gateway-connector-bridge/types";
-
-message ConnectMessage {
-  string id    = 1 [(gogoproto.customname) = "GatewayID"];
-  string key   = 3;
-}
-
-// ... 
-
-```
-
-#### MQTT SUBSCRIBE
+#### MQTT SUBSCRIBE message format
 
 The SUBSCRIBE MQTT message in question conforms to the MQTT v3.1 specification.
 
@@ -131,11 +102,11 @@ Briefly, a disconnection procedure can be performed by following steps:
 
 Refer to sections below for more detailed description of each step.
 
-#### MQTT UNSUBSCRIBE
+#### MQTT UNSUBSCRIBE message format
 
 The UNSUBSCRIBE MQTT message in question conforms to the MQTT v3.1 specification.
 
-#### MQTT PUBLISH
+#### Disconnection message (MQTT PUBLISH) format
 
 The PUBLISH MQTT message in question conforms to the MQTT v3.1 specification.
 
@@ -144,27 +115,13 @@ Following MQTT parameters are required by TTN for disconnect MQTT message:
 * QoS level: 1
 * RETAIN flag: false
 
-Additionally, TTN client must supply a protobuf payload, described by the `DisconnectMessage` protobuf, that can be found in `github.com/TheThingsNetwork/gateway-connector-bridge/types/types.proto`. Relevant message is described below.
+Additionally, TTN client must supply a protobuf payload, described by the `DisconnectMessage` protobuf, that can be found in `github.com/TheThingsNetwork/gateway-connector-bridge/types/types.proto`. 
 
-```protobuf
-syntax = "proto3";
+* [`DisconnectMessage` - top-level container for the disconnect message](https://github.com/TheThingsNetwork/gateway-connector-bridge/blob/8a00f170d96aa0867ac43faa6d1c0ad705204a81/types/types.proto#L17-L20):
+  * `id` - string - gateway ID.
+  * `key` - string - gateway key.
 
-import "github.com/gogo/protobuf/gogoproto/gogo.proto";
-
-package types;
-
-option go_package = "github.com/TheThingsNetwork/gateway-connector-bridge/types";
-
-// ... 
-
-message DisconnectMessage {
-  string id = 1 [(gogoproto.customname) = "GatewayID"];
-  string key   = 3;
-}
-
-```
-
-#### MQTT DISCONNECT
+#### MQTT DISCONNECT message format
 
 The DISCONNECT MQTT message in question conforms to the MQTT v3.1 specification.
 
@@ -172,7 +129,7 @@ The DISCONNECT MQTT message in question conforms to the MQTT v3.1 specification.
 
 A sending procedure consist of sending the PUBLISH MQTT message to `[id]/up` topic, where `[id]` is a gateway ID with a protobuf payload, as described below.
 
-#### MQTT PUBLISH
+#### Uplink message (MQTT PUBLISH) format
 
 The PUBLISH MQTT message in question conforms to the MQTT v3.1 specification.
 
@@ -181,291 +138,68 @@ A client must set following fields in PUBLISH message in order to send data to T
 * QoS level: 1
 * RETAIN flag: false
 
-Additionally, TTN client must supply a protobuf payload, described by the `UplinkMessage` protobuf, that can be found in `github.com/TheThingsNetwork/api/router/router.proto` and in nested protobuffers. Relevant messages and their fields are described below.
+Additionally, TTN client must supply a protobuf payload, described by the `UplinkMessage` protobuf, that can be found in `github.com/TheThingsNetwork/api/router/router.proto` and in nested protobuffers. Only relevant messages and their fields are described below.
 
-`github.com/TheThingsNetwork/api/router/router.proto`. Only the pop-level container for the uplink data is shown for clarity.
+`github.com/TheThingsNetwork/api/router/router.proto`. 
 
-```protobuf
-
-// ... 
-
-message UplinkMessage {
-  bytes                payload            = 1;
-  protocol.Message     message            = 2;
-  protocol.RxMetadata  protocol_metadata  = 11 [(gogoproto.nullable) = false];
-  gateway.RxMetadata   gateway_metadata   = 12 [(gogoproto.nullable) = false];
-  trace.Trace          trace              = 21;
-}
-
-// ...
-
-```
-
-`github.com/TheThingsNetwork/api/protocol/protocol.proto`. Only RX (uplink) metadata proxy type is shown for clarity.
-
-```protobuf
-
-// ...
-
-message RxMetadata {
-  oneof protocol {
-    lorawan.Metadata lorawan = 1 [(gogoproto.customname) = "LoRaWAN"];
-  }
-}
-
-// ...
-
-```
-
-`github.com/TheThingsNetwork/api/protocol/lorawan/lorawan.proto`. In the uplink procedure, only `Metadata` and `Modulaion` types are used. 
-
-```protobuf
-
-// ...
-
-enum Modulation {
-  LORA = 0;
-  FSK  = 1;
-}
-
-message Metadata {
-  Modulation  modulation   = 11;
-  // LoRa data rate - SF{spreadingfactor}BW{bandwidth}
-  string      data_rate    = 12;
-  // FSK bit rate in bit/s
-  uint32      bit_rate     = 13;
-  // LoRa coding rate
-  string      coding_rate  = 14;
-
-  // Store the full 32 bit FCnt (deprecated; do not use)
-  uint32      f_cnt = 15;
-
-  FrequencyPlan frequency_plan = 16;
-}
-
-// ...
-
-```
-
-`github.com/TheThingsNetwork/api/gateway/gateway.proto`:
-
-```
-
-message RxMetadata {
-  string  gateway_id = 1 [(gogoproto.customname) = "GatewayID"];
-
-  // Indicates whether the gateway is trusted. Components that are able to verify gateway trust MUST do so and set this value accordingly
-  bool    gateway_trusted = 2;
-
-  // Timestamp (uptime of LoRa module) in microseconds with rollover
-  uint32  timestamp  = 11;
-  // Time in Unix nanoseconds
-  int64   time       = 12;
-
-  // Encrypted time from the Gateway FPGA
-  bytes   encrypted_time = 13;
-
-  uint32  rf_chain   = 21;
-  uint32  channel    = 22;
-
-  repeated Antenna antennas = 30;
-
-  // Frequency in Hz
-  uint64  frequency  = 31;
-  // Received signal strength in dBm
-  float   rssi       = 32 [(gogoproto.customname) = "RSSI"];
-  // Signal-to-noise-ratio in dB
-  float   snr        = 33 [(gogoproto.customname) = "SNR"];
-
-  message Antenna {
-    uint32 antenna = 1;
-    uint32 channel = 2;
-
-    // Received signal power in dBm
-    float  rssi         = 3 [(gogoproto.customname) = "RSSI"];
-
-    // Received channel power in dBm
-    float  channel_rssi = 5 [(gogoproto.customname) = "ChannelRSSI"];
-
-    // Standard deviation of the RSSI
-    float  rssi_standard_deviation = 6 [(gogoproto.customname) = "RSSIStandardDeviation"];
-
-    // Frequency offset (Hz)
-    int64 frequency_offset = 7;
-
-    // Signal-to-noise-ratio in dB
-    float  snr     = 4 [(gogoproto.customname) = "SNR"];
-
-    // Encrypted fine timestamp from the Gateway FPGA
-    bytes encrypted_time = 10;
-
-    // Fine timestamp from the Gateway FPGA (decrypted)
-    int64 fine_time = 11;
-  }
-
-  LocationMetadata location = 41;
-}
-
-// ...
-
-```
+* [`UplinkMessage` - the top-level container for the uplink data](https://github.com/TheThingsNetwork/api/blob/22ad17f21fd52dca346a3bb4d4c9889dd9636f7d/router/router.proto#L25-L31)
+  * `payload` - `bytes` - uplink LoRa payload.
+  * [`protocol_metadata` - `lorawan.Metadata` - container for uplink metadata](https://github.com/TheThingsNetwork/api/blob/22ad17f21fd52dca346a3bb4d4c9889dd9636f7d/protocol/lorawan/lorawan.proto#L21-L34).
+    * [`modulation` - `Modulation` - LoRa of FSK modulation flag](https://github.com/TheThingsNetwork/api/blob/22ad17f21fd52dca346a3bb4d4c9889dd9636f7d/protocol/lorawan/lorawan.proto#L16-L19)
+    * `data_rate` - `string` - LoRa data rate in form SF{spreadingfactor}BW{bandwidth}.
+    * `bit_rate` - `uint32` - FSK bit rate in bit/s.
+    * `coding_rate` - `string` - LoRa coding rate
+    * `f_cnt` - `uint32` - the full 32 bit FCnt (deprecated, do not use).
+    * [`frequency_plan` - `FrequencyPlan` - frequency plan enumeration.](https://github.com/TheThingsNetwork/api/blob/master/protocol/lorawan/lorawan.proto#L62-L82)
+  * `message` - `lorawan.Message` - not used when sending uplink from the gateway to TTN bridge.
+  * `trace` - `trace.Trace` - not used.
 
 ### Receiving data
 
-### Sending status message
+The downlink data is published by TTN on `[id]/down` topic, where `[id]` is a gateway ID. The payload is serialized using protobufs, as described in the following section.
 
-## Protobufs in question
+#### Downlink message (MQTT PUBLISH) format
 
-### Connection and disconnection payload protobuf
+The PUBLISH MQTT message in question conforms to the MQTT v3.1 specification.
 
-Protobuf path: `github.com/TheThingsNetwork/gateway-connector-bridge/types/types.proto`
+A protobuf payload is described by the `DownlinkMessage` protobuf, that can be found in `github.com/TheThingsNetwork/api/router/router.proto` and in nested protobuffers. Only relevant messages and their fields are shown below.
 
-```protobuf
-// Copyright © 2017 The Things Network
-// Use of this source code is governed by the MIT license that can be found in the LICENSE file.
+* [`DownlinkMessage` - the top-level container for the downlink data](https://github.com/TheThingsNetwork/api/blob/22ad17f21fd52dca346a3bb4d4c9889dd9636f7d/router/router.proto#L33-L39)
+  * `payload` - `bytes` - downlink LoRa payload.
+  * [`protocol_configuration` - `lorawan.TxConfiguration` - LoRa configuration](https://github.com/TheThingsNetwork/api/blob/22ad17f21fd52dca346a3bb4d4c9889dd9636f7d/protocol/lorawan/lorawan.proto#L36-L47).
+    * [`modulation` - `Modulation` - LoRa of FSK modulation flag]()
+    * `data_rate` - `string` - LoRa data rate in form SF{spreadingfactor}BW{bandwidth}.
+    * `bit_rate` - `uint32` - FSK bit rate in bit/s.
+    * `coding_rate` - `string` - LoRa coding rate
+  * [`gateway_configuration` - `gateway.TxConfiguration` - gateway configuration](https://github.com/TheThingsNetwork/api/blob/22ad17f21fd52dca346a3bb4d4c9889dd9636f7d/gateway/gateway.proto#L104-L119).
+    * `timestamp` - `uint32` - Timestamp (uptime of LoRa module) in microseconds with rollover.
+    * `rf_chain` - `uint32` - RF chain.
+    * `frequency` - `uint64` - Frequency in Hz.
+    * `power` - `int32` - Transmit power in dBm.
+    * `polarization_inversion` - `bool` - LoRa polarization inversion (basically always true for messages from gateway to node).
+    * `frequency_deviation` - `uint32` - FSK frequency deviation in Hz
+  * `message` - `lorawan.Message` - not used when receiving downlink from TTN bridge.
+  * `trace` - `trace.Trace` - not used.
 
-syntax = "proto3";
+### Sending the gateway status message
 
-import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+A sending status procedure consist of sending the PUBLISH MQTT message to `[id]/status` topic, where `[id]` is a gateway ID with a protobuf payload, as described below.
 
-package types;
+#### Status message (MQTT PUBLISH) format
 
-option go_package = "github.com/TheThingsNetwork/gateway-connector-bridge/types";
+The PUBLISH MQTT message in question conforms to the MQTT v3.1 specification.
 
-message ConnectMessage {
-  string id    = 1 [(gogoproto.customname) = "GatewayID"];
-  string key   = 3;
-}
+A client must set following fields in PUBLISH message in order to send data to TTN:
 
-message DisconnectMessage {
-  string id = 1 [(gogoproto.customname) = "GatewayID"];
-  string key   = 3;
-}
-```
+* QoS level: 1
+* RETAIN flag: false
 
-### Router payload protobuf
+A protobuf payload is described by the `Status` protobuf, that can be found in `github.com/TheThingsNetwork/api/gateway/gateway.proto` and in nested protobuffers. Only relevant messages and their fields are shown below.
 
-Protobuf path: `github.com/TheThingsNetwork/gateway-connector-bridge/types/types.proto`
+* [`Status` - the top-level container for the status data](https://github.com/TheThingsNetwork/api/blob/22ad17f21fd52dca346a3bb4d4c9889dd9636f7d/router/router.proto#L33-L39)
+  * `message` - `lorawan.Message` - not used when receiving downlink from TTN bridge.
+  * `trace` - `trace.Trace` - not used.
 
-```protobuf
-// Copyright © 2017 The Things Network
-// Use of this source code is governed by the MIT license that can be found in the LICENSE file.
-
-syntax = "proto3";
-
-import "google/protobuf/empty.proto";
-
-import "github.com/gogo/protobuf/gogoproto/gogo.proto";
-
-import "github.com/TheThingsNetwork/api/api.proto";
-import "github.com/TheThingsNetwork/api/protocol/protocol.proto";
-import "github.com/TheThingsNetwork/api/gateway/gateway.proto";
-import "github.com/TheThingsNetwork/api/trace/trace.proto";
-
-package router;
-
-option csharp_namespace = "TheThingsNetwork.API.Router";
-option go_package = "github.com/TheThingsNetwork/api/router";
-option java_package = "org.thethingsnetwork.api.router";
-option java_outer_classname = "RouterProto";
-option java_multiple_files = true;
-
-message SubscribeRequest {}
-
-message UplinkMessage {
-  bytes                payload            = 1;
-  protocol.Message     message            = 2;
-  protocol.RxMetadata  protocol_metadata  = 11 [(gogoproto.nullable) = false];
-  gateway.RxMetadata   gateway_metadata   = 12 [(gogoproto.nullable) = false];
-  trace.Trace          trace              = 21;
-}
-
-message DownlinkMessage {
-  bytes                     payload                 = 1;
-  protocol.Message          message                 = 2;
-  protocol.TxConfiguration  protocol_configuration  = 11 [(gogoproto.nullable) = false];
-  gateway.TxConfiguration   gateway_configuration   = 12 [(gogoproto.nullable) = false];
-  trace.Trace               trace                   = 21;
-}
-
-message DeviceActivationRequest {
-  bytes                        payload              = 1;
-  protocol.Message             message              = 2;
-  bytes                        dev_eui              = 11 [(gogoproto.customname) = "DevEUI", (gogoproto.nullable) = false, (gogoproto.customtype) = "github.com/TheThingsNetwork/ttn/core/types.DevEUI"];
-  bytes                        app_eui              = 12 [(gogoproto.customname) = "AppEUI", (gogoproto.nullable) = false, (gogoproto.customtype) = "github.com/TheThingsNetwork/ttn/core/types.AppEUI"];
-  protocol.RxMetadata          protocol_metadata    = 21 [(gogoproto.nullable) = false];
-  gateway.RxMetadata           gateway_metadata     = 22 [(gogoproto.nullable) = false];
-  protocol.ActivationMetadata  activation_metadata  = 23;
-  trace.Trace                  trace                = 31;
-}
-
-message DeviceActivationResponse {
-  // NOTE: In LoRaWAN, device activations are accepted with DownlinkMessages, so
-  // this message is just an Ack.
-  //
-  // bytes                     payload                 = 1;
-  // protocol.Message          message                 = 2;
-  // protocol.TxConfiguration  protocol_configuration  = 11;
-  // gateway.TxConfiguration   gateway_configuration   = 12;
-  // trace.Trace               trace                   = 21;
-}
-
-// The Router service provides pure network functionality
-service Router {
-  // Gateway streams status messages to Router
-  rpc GatewayStatus(stream gateway.Status) returns (google.protobuf.Empty);
-
-  // Gateway streams uplink messages to Router
-  rpc Uplink(stream UplinkMessage) returns (google.protobuf.Empty);
-
-  // Gateway subscribes to downlink messages from Router
-  // It is possible to open multiple subscriptions (but not recommended).
-  // If you do this, you are responsible for de-duplication of downlink messages.
-  rpc Subscribe(SubscribeRequest) returns (stream DownlinkMessage);
-
-  // Gateway requests device activation
-  rpc Activate(DeviceActivationRequest) returns (DeviceActivationResponse);
-}
-
-// message GatewayStatusRequest is used to request the status of a gateway from
-// this Router
-message GatewayStatusRequest {
-  string gateway_id = 1 [(gogoproto.customname) = "GatewayID"];
-}
-
-message GatewayStatusResponse {
-  int64           last_seen  = 1;
-  gateway.Status  status     = 2 [(gogoproto.nullable) = false];
-}
-
-// message StatusRequest is used to request the status of this Router
-message StatusRequest {}
-
-// message Status is the response to the StatusRequest
-message Status {
-  api.SystemStats    system    = 1;
-  api.ComponentStats component = 2;
-
-  api.Rates gateway_status   = 11;
-  api.Rates uplink           = 12;
-  api.Rates downlink         = 13;
-  api.Rates activations      = 14;
-
-  // Connections
-  uint32  connected_gateways  = 21;
-  uint32  connected_brokers   = 22;
-}
-
-// The RouterManager service provides configuration and monitoring functionality
-service RouterManager {
-  // Gateway owner or network operator requests Gateway status from Router Manager
-  // Deprecated: Use monitor API (NOC) instead of this
-  rpc GatewayStatus(GatewayStatusRequest) returns (GatewayStatusResponse);
-
-  // Network operator requests Router status
-  rpc GetStatus(StatusRequest) returns (Status);
-}
-```
 
 ## Protocol overview
 
