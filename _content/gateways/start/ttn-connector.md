@@ -12,13 +12,13 @@ This page describes a protobuf-over-MQTT protocol between TheThingsNetwork gatew
 Yes. This protocol provides the following advantages over [Semtech's packet forwarder](https://github.com/Lora-net/packet_forwarder) reference implementation:
 
 1. When using TCP/IP, there is an open and more reliable connection with The Things Network as compared to UDP which suffers from congestion and firewalls.
-1. When using MQTT, we build on top of a proven and well-supported messaging protocol as compared to custom headers and breaking changes on message protocol level
-1. When using authentication, we can identify gateways according to their ID and security key as compared to user-defined EUIs which deemed unreliable
-1. When using Protocol Buffers, we use proven and well-supported (un)packing and we are binary compatible with The Things Network back-end while minimizing payload and allow for protocol changes
+1. When using MQTT, we build on top of a proven and well-supported messaging protocol as compared to custom headers and breaking changes on message protocol level.
+1. When using authentication, we can identify gateways according to their ID and security key as compared to user-defined EUIs which deemed unreliable.
+1. When using Protocol Buffers, we use proven and well-supported (un)packing and we are binary compatible with The Things Network back-end while minimizing payload and allow for protocol changes.
 
 ## Existing implementation
 
-There is the official Gateway Connector Library, which implements the protocol. Check it, if you don't want implement protocol from scratch.
+There is the official [Gateway Connector Library](https://github.com/TheThingsNetwork/ttn-gateway-connector), which implements the protocol. Check it, if you don't want implement protocol from scratch.
 
 ## Bridges
 
@@ -31,13 +31,6 @@ TTN bridge is a host that supports the TTN connector protocol. Below is the list
 * `router.thethingsnetwork.jp:1883`
 * `thethings.meshed.com.au:1882`
 * `ttn.opennetworkinfrastructure.org:1882`
-
-```
-
-3. Add commands examples to generate C structures from given protobufs.
-4. Add some code examples.
-
-```
 
 ## Protocol flow
 
@@ -198,6 +191,8 @@ The status message format is defined by [the `Status` protomessage](https://gith
 
 Use a steps below to generate sources for message serialization.
 
+1. Install [`protobuf-c` generator](https://github.com/protobuf-c/protobuf-c).
+
 1. Reconstruct correct directory structure
 
    ```bash
@@ -214,7 +209,7 @@ Use a steps below to generate sources for message serialization.
     git clone https://github.com/gogo/protobuf.git github.com/gogo/protobuf
    ```
 
-1. Generate C messages
+1. Generate C structures
 
    ```
     protoc-c --c_out=. --proto_path=github.com/TheThingsNetwork/api/ -I.     github.com/gogo/protobuf/protobuf/google/protobuf/descriptor.proto
@@ -229,5 +224,8 @@ Use a steps below to generate sources for message serialization.
     protoc-c --c_out=. --proto_path=github.com/TheThingsNetwork/api/ -I. github.com/TheThingsNetwork/gateway-connector-bridge/types/types.proto
    ```
 
+From now on, you can use following headers to use when serializing data for TTN protocol:
 
-## Existing implementations
+* `GatewayStatus` is defined in `github.com/TheThingsNetwork/ttn/api/gateway/gateway.pb-c.h`.
+* `UplinkMessage`, `DownlinkMessage` are defined in `github.com/TheThingsNetwork/ttn/api/router/router.pb-c.h`.
+* `ConnectMessage`, `DisconnectMessage` are defined in `github.com/TheThingsNetwork/gateway-connector-bridge/types/types.pb-c.h`.
