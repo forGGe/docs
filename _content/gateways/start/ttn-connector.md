@@ -34,8 +34,6 @@ TTN bridge is a host that supports the TTN connector protocol. Below is the list
 
 ```
 
-1. Describe connect/disconnect/send/receive MQTT procedure.
-2. Describe connect/disconnect/send/receive protobufs.
 3. Add commands examples to generate C structures from given protobufs.
 4. Add some code examples.
 
@@ -181,7 +179,7 @@ The downlink message format is defined by [the `DownlinkMessage` protomessage](h
 
 A sending status procedure consist of sending the PUBLISH MQTT message to `[id]/status` topic, where `[id]` is a gateway ID with a protobuf payload, as described below.
 
-### Status message (MQTT PUBLISH) format
+#### Status message (MQTT PUBLISH) format
 
 The PUBLISH MQTT message in question conforms to the MQTT v3.1 specification.
 
@@ -192,6 +190,44 @@ A client must set following fields in PUBLISH message in order to send data to T
 
 Additionally, TTN client must supply a protobuf payload, as described in the next section.
 
-### Status message payload (protobuf) format.
+#### Status message payload (protobuf) format.
 
 The status message format is defined by [the `Status` protomessage](https://github.com/TheThingsNetwork/api/blob/22ad17f21fd52dca346a3bb4d4c9889dd9636f7d/gateway/gateway.proto#L122-L199), detailed description of which is [located under separate section in API repository](https://github.com/TheThingsNetwork/api/blob/fb52190ace68dfb15b2b13ee07a36e9e195cfcf2/router/Router.md#gatewaystatus-1).
+
+## Generating C structures from protobuffers
+
+Use a steps below to generate sources for message serialization.
+
+1. Reconstruct correct directory structure
+
+   ```bash
+
+    mkdir -p github.com/TheThingsNetwork/
+    mkdir -p github.com/gogo/
+ 
+   ```
+1. Download protobuf definitions
+
+   ```bash
+    git clone https://github.com/TheThingsNetwork/api github.com/TheThingsNetwork/api
+    git clone https://github.com/TheThingsNetwork/gateway-connector-bridge.git github.com/TheThingsNetwork/gateway-connector-bridge
+    git clone https://github.com/gogo/protobuf.git github.com/gogo/protobuf
+   ```
+
+1. Generate C messages
+
+   ```
+    protoc-c --c_out=. --proto_path=github.com/TheThingsNetwork/api/ -I.     github.com/gogo/protobuf/protobuf/google/protobuf/descriptor.proto
+    protoc-c --c_out=. --proto_path=github.com/TheThingsNetwork/api/ -I. github.com/gogo/protobuf/protobuf/google/protobuf/empty.proto
+    protoc-c --c_out=. --proto_path=github.com/TheThingsNetwork/api/ -I. github.com/gogo/protobuf/gogoproto/gogo.proto
+    protoc-c --c_out=. --proto_path=github.com/TheThingsNetwork/api/ -I. github.com/TheThingsNetwork/api/api.proto
+    protoc-c --c_out=. --proto_path=github.com/TheThingsNetwork/api/ -I. github.com/TheThingsNetwork/api/trace/trace.proto
+    protoc-c --c_out=. --proto_path=github.com/TheThingsNetwork/api/ -I. github.com/TheThingsNetwork/api/gateway/gateway.proto
+    protoc-c --c_out=. --proto_path=github.com/TheThingsNetwork/api/ -I. github.com/TheThingsNetwork/api/protocol/protocol.proto
+    protoc-c --c_out=. --proto_path=github.com/TheThingsNetwork/api/ -I. github.com/TheThingsNetwork/api/protocol/lorawan/lorawan.proto
+    protoc-c --c_out=. --proto_path=github.com/TheThingsNetwork/api/ -I. github.com/TheThingsNetwork/api/router/router.proto
+    protoc-c --c_out=. --proto_path=github.com/TheThingsNetwork/api/ -I. github.com/TheThingsNetwork/gateway-connector-bridge/types/types.proto
+   ```
+
+
+## Existing implementations
